@@ -21,6 +21,9 @@ var BATCH_SIZE = 5;
 // wait time between each test in test queue
 var QUEUE_WAIT = 10;
 
+// is test run on CI
+var isCI = process.env.CIRCLECI;
+
 /**
  *  Image pixel comparison test script.
  *
@@ -73,24 +76,27 @@ else {
  *
  * - font-wishlist
  * - all gl2d
- * - all mapbox
+ * - mapbox when run in batch on CI
  *
  * don't behave consistently from run-to-run and/or
  * machine-to-machine; skip over them for now.
  *
  */
 function untestableFilter(mockName) {
-    return !(
-        mockName === 'font-wishlist' ||
-        mockName.indexOf('gl2d_') !== -1 ||
-        mockName.indexOf('mapbox_') !== -1
+    var filter = (
+        mockName !== 'font-wishlist' &&
+        mockName.indexOf('gl2d_') === -1
     );
+
+    if(!isInQueue && isCI) {
+        filter = filter && mockName.indexOf('mapbox_') !== -1;
+    }
+
+    return filter;
 }
 
 function runInBatch(mockList) {
     var running = 0;
-
-    // remove mapbox mocks if circle ci
 
     test('testing mocks in batch', function(t) {
         t.plan(mockList.length);
