@@ -9,7 +9,7 @@ var isCI = process.env.CIRCLECI;
 makeCredentialsFile();
 makeSetPlotConfigFile();
 makeTestImageFolders();
-if(isCI) setupImageTestContainer();
+if(isCI) runAndSetupImageTestContainer();
 
 // Create a credentials json file,
 // to be required in jasmine test suites and test dashboard
@@ -56,16 +56,26 @@ function makeTestImageFolders() {
 }
 
 // On CircleCI, run and setup image test container once an for all
-function setupImageTestContainer() {
-    var cmd = containerCommands.getRunCmd(isCI, [
-        containerCommands.dockerRun,
-        containerCommands.setup
-    ]);
+function runAndSetupImageTestContainer() {
 
-    common.execCmd(cmd, function() {
-        logger('run docker container');
-        logger('setup docker container');
-    });
+    function run() {
+        var cmd = containerCommands.dockerRun;
+        common.execCmd(cmd, function() {
+            logger('run docker container');
+            setup();
+        });
+    }
+
+    function setup() {
+        var cmd = containerCommands.getRunCmd(isCI, [
+            containerCommands.setup
+        ]);
+        common.execCmd(cmd, function() {
+            logger('setup docker container');
+        });
+    }
+
+    run();
 }
 
 function logger(task) {
