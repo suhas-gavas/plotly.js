@@ -23,7 +23,7 @@ containerCommands.dockerRun = [
     'docker run -d',
     '--name', constants.testContainerName,
     '-v', constants.pathToRoot + ':' + constants.testContainerHome,
-    '-p', constants.testContainerUrl,
+    '-p', constants.testContainerPort + ':' + constants.testContainerPort,
     'plotly/testbed:latest'
 ].join(' ');
 
