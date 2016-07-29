@@ -55,7 +55,7 @@ function getRunCI(commands) {
         'lxc-attach -n',
         '$(docker inspect --format \'{{.Id}}\'' + constants.testContainerName + ')',
         '-- bash -c',
-        commands.join(' && ')
+        '"' + commands.join(' && ') + '"'
     ].join(' ');
 }
 
