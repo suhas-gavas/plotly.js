@@ -19,6 +19,7 @@ function makeCredentialsFile() {
     }, null, 2);
 
     common.writeFile(constants.pathToCredentials, credentials);
+    logger('make build/credentials.json');
 }
 
 // Create a 'set plot config' file,
@@ -36,25 +37,37 @@ function makeSetPlotConfigFile() {
     ].join('\n');
 
     common.writeFile(constants.pathToSetPlotConfig, setPlotConfig);
+    logger('make build/set_plot_config.js');
 }
 
 // Make artifact folders for image tests
 function makeTestImageFolders() {
-    if(!common.doesDirExist(constants.pathToTestImagesDiff)) {
-        fs.mkdirSync(constants.pathToTestImagesDiff);
+
+    function makeOne(folderPath, info) {
+        if(!common.doesDirExist(folderPath)) {
+            fs.mkdirSync(folderPath);
+            logger('initialize ' + info);
+        }
+        else logger(info + ' is present');
     }
 
-    if(!common.doesDirExist(constants.pathToTestImages)) {
-        fs.mkdirSync(constants.pathToTestImages);
-    }
+    makeOne(common.pathToTestImages, 'test image folder');
+    makeOne(common.pathToTestImagesDiff, 'test image diff folder');
 }
 
 // On CircleCI, run and setup image test container once an for all
 function setupImageTestContainer() {
-    var cmd = containerCommands.getRunCmd(, isCI, [
+    var cmd = containerCommands.getRunCmd(isCI, [
         containerCommands.dockerRun,
         containerCommands.setup
     ]);
 
-    common.execCmd(cmd);
+    common.execCmd(cmd, function() {
+        logger('run docker container');
+        logger('setup docker container');
+    });
+}
+
+function logger(task) {
+    console.log('ok ' + task);
 }
