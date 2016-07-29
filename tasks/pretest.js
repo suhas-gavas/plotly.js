@@ -1,50 +1,60 @@
 var fs = require('fs');
+
 var constants = require('./util/constants');
+var common = require('./util/common');
+var containerCommands = require('./util/container_commands');
+var isCI = process.env.CIRCLECI;
 
-
+// main
+makeCredentialsFile();
+makeSetPlotConfigFile();
+makeTestImageFolders();
+if(isCI) setupImageTestContainer();
 
 // Create a credentials json file,
 // to be required in jasmine test suites and test dashboard
-var credentials = JSON.stringify({
-    MAPBOX_ACCESS_TOKEN: mapboxAccessToken
-}, null, 2);
+function makeCredentialsFile() {
+    var credentials = JSON.stringify({
+        MAPBOX_ACCESS_TOKEN: constants.mapboxAccessToken
+    }, null, 2);
 
-fs.writeFile(constants.pathToCredentials, credentials, function(err) {
-    if(err) throw err;
-});
+    common.writeFile(constants.pathToCredentials, credentials);
+}
 
 // Create a 'set plot config' file,
 // to be included in the image test index
-var setPlotConfig = [
-    '\'use strict\';',
-    '',
-    '/* global Plotly:false */',
-    '',
-    'Plotly.setPlotConfig({',
-    '    mapboxAccessToken: \'' + mapboxAccessToken + '\'',
-    '});',
-    ''
-].join('\n');
+function makeSetPlotConfigFile() {
+    var setPlotConfig = [
+        '\'use strict\';',
+        '',
+        '/* global Plotly:false */',
+        '',
+        'Plotly.setPlotConfig({',
+        '    mapboxAccessToken: \'' + constants.mapboxAccessToken + '\'',
+        '});',
+        ''
+    ].join('\n');
 
-fs.writeFile(constants.pathToSetPlotConfig, setPlotConfig, function(err) {
-    if(err) throw err;
-});
-
-// make artifact folders for image tests
-if(!doesDirExist(constants.pathToTestImagesDiff)) {
-    fs.mkdirSync(constants.pathToTestImagesDiff);
-}
-if(!doesDirExist(constants.pathToTestImages)) {
-    fs.mkdirSync(constants.pathToTestImages);
+    common.writeFile(constants.pathToSetPlotConfig, setPlotConfig);
 }
 
-function doesDirExist(dirPath) {
-    try {
-        if(fs.statSync(dirPath).isDirectory()) return true;
-    }
-    catch(e) {
-        return false;
+// Make artifact folders for image tests
+function makeTestImageFolders() {
+    if(!common.doesDirExist(constants.pathToTestImagesDiff)) {
+        fs.mkdirSync(constants.pathToTestImagesDiff);
     }
 
-    return false;
+    if(!common.doesDirExist(constants.pathToTestImages)) {
+        fs.mkdirSync(constants.pathToTestImages);
+    }
+}
+
+// On CircleCI, run and setup image test container once an for all
+function setupImageTestContainer() {
+    var cmd = containerCommands.getRunCmd(isCI, [
+        containerCommands.dockerRun,
+        containerCommands.setup
+    ]);
+
+    common.execCmd(cmd);
 }
