@@ -27,7 +27,7 @@ containerCommands.dockerRun = [
     'plotly/testbed:latest'
 ].join(' ');
 
-containerCommands.getRunCmd = function(commands, isCI) {
+containerCommands.getRunCmd = function(isCI, commands) {
     var _commands = Array.isArray(commands) ? commands.slice() : [commands];
 
     if(isCI) return getRunCI(_commands);
@@ -53,7 +53,7 @@ function getRunCI(commands) {
 
     return [
         'lxc-attach -n',
-        '$(docker inspect --format \'{{.Id}}\'' + constants.testContainerName + ')',
+        '$(docker inspect --format \'{{.Id}}\' ' + constants.testContainerName + ')',
         '-- bash -c',
         '"' + commands.join(' && ') + '"'
     ].join(' ');

@@ -51,7 +51,7 @@ function makeTestImageFolders() {
 
 // On CircleCI, run and setup image test container once an for all
 function setupImageTestContainer() {
-    var cmd = containerCommands.getRunCmd(isCI, [
+    var cmd = containerCommands.getRunCmd(, isCI, [
         containerCommands.dockerRun,
         containerCommands.setup
     ]);
