@@ -51,8 +51,8 @@ function makeTestImageFolders() {
         else logger(info + ' is present');
     }
 
-    makeOne(common.pathToTestImages, 'test image folder');
-    makeOne(common.pathToTestImagesDiff, 'test image diff folder');
+    makeOne(constants.pathToTestImages, 'test image folder');
+    makeOne(constants.pathToTestImagesDiff, 'test image diff folder');
 }
 
 // On CircleCI, run and setup image test container once an for all
